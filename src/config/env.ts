@@ -8,6 +8,7 @@ const envConfig = {
   PORT: env.PORT || 5000,
   NODE_ENV: env.NODE_ENV || "development",
   JWT_SECRET_KEY: env.JWT_SECRET_KEY,
+  BCRYPT_SALT_ROUNDS: env.BCRYPT_SALT_ROUNDS || 12,
 };
 
 export default envConfig;
