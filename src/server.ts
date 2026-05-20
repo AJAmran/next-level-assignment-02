@@ -1,8 +1,14 @@
-import express, { type Application } from "express";
+import app from "./app";
+import { initializeDB } from "./config/db";
 
-const app: Application = express();
 const port = 5000;
 const NODE_ENV = "development";
-app.listen(port, () => {
-  console.log(`🚀 Server running on port ${port} in ${NODE_ENV} mode`);
-});
+
+const main = () => {
+  initializeDB();
+  app.listen(port, () => {
+    console.log(`🚀 Server running on port ${port} in ${NODE_ENV} mode`);
+  });
+};
+
+main();

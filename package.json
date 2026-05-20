@@ -13,7 +13,8 @@
   "type": "module",
   "devDependencies": {
     "@types/express": "^5.0.6",
-    "@types/node": "^25.9.1"
+    "@types/node": "^25.9.1",
+    "@types/pg": "^8.20.0"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
