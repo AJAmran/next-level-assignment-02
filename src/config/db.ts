@@ -20,6 +20,23 @@ export const initializeDB = async () => {
     )
     `,
     );
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS issues(
+      id SERIAL PRIMARY KEY,
+    title VARCHAR(150) NOT NULL,
+    description TEXT NOT NULL,
+    type VARCHAR(20) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'open',
+    reporter_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT chk_issue_type CHECK (type IN ('bug', 'feature_request')),
+    CONSTRAINT chk_issue_status CHECK (status IN ('open', 'in_progress', 'resolved')),
+    CONSTRAINT chk_description_length CHECK (char_length(description) >= 20)
+      )
+      `);
     console.log("✅ Database connection pool created successfully.");
   } catch (error) {
     console.error("❌ Database initialization failed:", error);
