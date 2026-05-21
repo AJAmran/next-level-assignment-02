@@ -1,19 +1,43 @@
 import { pool } from "../config/db";
-import type { IIssue } from "../interfaces/issues.interface";
+import type {
+  IIssue,
+  IIssueQueryOptions,
+} from "../interfaces/issues.interface";
 
-const getAllIsueFromDB = async () => {
-  const issueResult = await pool.query(`
-    SELECT * FROM issues
-    `);
+const getAllIsueFromDB = async (options: IIssueQueryOptions) => {
+  const { sort = "newest", type, status } = options;
+
+  let queryText = `SELECT * FROM issues`;
+  const queryValues: string[] = [];
+  const whereConditions: string[] = [];
+
+  if (type) {
+    queryValues.push(type);
+    whereConditions.push(`type = $${queryValues.length}`);
+  }
+
+  if (status) {
+    queryValues.push(status);
+    whereConditions.push(`status = $${queryValues.length}`);
+  }
+
+  if (whereConditions.length > 0) {
+    queryText += ` WHERE ${whereConditions.join(" AND ")}`;
+  }
+
+  const orderBy = sort === "oldest" ? "ASC" : "DESC";
+  queryText += ` ORDER BY created_at ${orderBy}`;
+
+  const issueResult = await pool.query(queryText, queryValues);
   const issues = issueResult.rows;
   if (issues.length === 0) {
     return [];
   }
 
-  //all reporter ids
+  //?all reporter ids
   const reporterIds = [...new Set(issues.map((issue) => issue.reporter_id))];
 
-  //dynamic placeholder
+  //?dynamic placeholder
   const placeholders = reporterIds
     .map((_, index) => {
       return `$${index + 1}`;

@@ -2,6 +2,32 @@ import type { NextFunction, Request, Response } from "express";
 import { issueService } from "../services/issue.service";
 import { ApiError } from "../utils/ApiError";
 import sendResponse from "../utils/sendResponse";
+import type { IIssueQueryOptions } from "../interfaces/issues.interface";
+const getAllIssues = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { sort, type, status } = req.query;
+    const result = await issueService.getAllIsueFromDB({
+      sort,
+      type,
+      status,
+    } as IIssueQueryOptions);
+    if (!result || result.length === 0) {
+      throw new ApiError(404, "No issues found");
+    }
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 
 const createIssue = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -24,26 +50,6 @@ const createIssue = async (req: Request, res: Response, next: NextFunction) => {
       success: true,
       message: "Issue created successfully",
       data: result.rows[0],
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-const getAllIssues = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
-    const result = await issueService.getAllIsueFromDB();
-    if (!result || result.length === 0) {
-      throw new ApiError(404, "No issues found");
-    }
-    sendResponse(res, {
-      statusCode: 200,
-      success: true,
-      data: result,
     });
   } catch (error) {
     next(error);

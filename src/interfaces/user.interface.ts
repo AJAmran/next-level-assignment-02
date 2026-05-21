@@ -12,4 +12,8 @@ export interface IUser {
   role?: UserRoleType;
 }
 
-export type IUserResponse = Omit<IUser, "password">;
+export type IUserResponse = Omit<IUser, "password"> & {
+  id: number;
+  created_at?: Date;
+  updated_at?: Date;
+};
