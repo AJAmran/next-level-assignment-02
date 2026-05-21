@@ -4,6 +4,7 @@ import { authMiddleware } from "../middlewares/auth.middleware";
 
 const router = express.Router();
 
+router.get("/", issueController.getAllIssues);
 router.post(
   "/",
   authMiddleware("contributor", "maintainer"),
