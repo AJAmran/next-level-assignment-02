@@ -1,13 +1,13 @@
 import app from "./app";
 import { initializeDB } from "./config/db";
-
-const port = 5000;
-const NODE_ENV = "development";
+import envConfig from "./config/env";
 
 const main = () => {
   initializeDB();
-  app.listen(port, () => {
-    console.log(`🚀 Server running on port ${port} in ${NODE_ENV} mode`);
+  app.listen(envConfig.PORT, () => {
+    console.log(
+      `🚀 Server running on port ${envConfig.PORT} in ${envConfig.NODE_ENV} mode`,
+    );
   });
 };
 
