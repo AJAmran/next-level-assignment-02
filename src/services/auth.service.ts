@@ -5,7 +5,7 @@ import type { IUser } from "../interfaces/user.interface";
 import jwt from "jsonwebtoken";
 
 const signUp = async (payload: IUser) => {
-  const { name, email, password, role } = payload;
+  const { name, email, password, role = 'contributor' } = payload;
   const hashedPassword = await bcrypt.hash(
     password,
     Number(envConfig.BCRYPT_SALT_ROUNDS),
@@ -35,8 +35,8 @@ const login = async (payload: { email: string; password: string }) => {
   );
 
   if (Result.rows.length === 0) {
-    throw new Error("User not found");
-  }
+  throw new Error("User not found");
+}
 
   const user = Result.rows[0];
   //compare password

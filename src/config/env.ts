@@ -12,7 +12,7 @@ const envConfig = {
   JWT_EXPIRES_IN: (env.JWT_EXPIRES_IN || "1d") as NonNullable<
     SignOptions["expiresIn"]
   >,
-  BCRYPT_SALT_ROUNDS: env.BCRYPT_SALT_ROUNDS as string,
+  BCRYPT_SALT_ROUNDS: Number(env.BCRYPT_SALT_ROUNDS || 12),
 };
 
 export default envConfig;

@@ -1,9 +1,9 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { authService } from "../services/auth.service";
 import sendResponse from "../utils/sendResponse";
 import type { IUserResponse } from "../interfaces/user.interface";
 
-const signUpUser = async (req: Request, res: Response) => {
+const signUpUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const result: IUserResponse = await authService.signUp(req.body);
     console.log(result);
@@ -22,32 +22,24 @@ const signUpUser = async (req: Request, res: Response) => {
       });
     }
   } catch (error) {
-    sendResponse(res, {
-      statusCode: 500,
-      success: false,
-      message: "Internal server error",
-    });
+    next(error);
   }
 };
 
-const loginUser = async (req: Request, res: Response) => {
+const loginUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const result = await authService.login(req.body);
     sendResponse(res, {
       statusCode: 200,
       success: true,
-      message: "User logged in successfully",
+      message: "Login successful",
       data: {
         token: result.accessToken,
         user: result.user,
       },
     });
   } catch (error) {
-    sendResponse(res, {
-      statusCode: 401,
-      success: false,
-      message: "Invalid email or password",
-    });
+    next(error);
   }
 };
 

@@ -13,5 +13,6 @@ router.post(
 );
 
 router.patch("/:id", authMiddleware("contributor", "maintainer"), issueController.updateIssue);
+router.delete("/:id", authMiddleware("maintainer"), issueController.deleteIssue)
 
 export const issueRoute = router;

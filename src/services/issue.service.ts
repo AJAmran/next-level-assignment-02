@@ -83,7 +83,7 @@ const getSingleIssueFromDB = async (id: string) => {
   );
 
   if (issueResult.rows.length === 0) {
-    return [];
+    throw new ApiError(404, "Issue not found");
   }
   const issue = issueResult.rows[0];
 
@@ -134,7 +134,7 @@ const updateIssueIntoDB = async (
 ) => {
   const issueCheck = await pool.query(
     `
-      SELECT reporter_id FROM issues WHERE id = $1
+      SELECT reporter_id, status FROM issues WHERE id = $1
       `,
     [id],
   );
@@ -145,9 +145,32 @@ const updateIssueIntoDB = async (
 
   const issue = issueCheck.rows[0];
 
-  if (userRole !== "maintainer" && issue.reporter_id !== userId) {
-    throw new ApiError(403, "You are not authorized to update this issue");
+  if (userRole !== "maintainer") {
+    // Must be issue owner
+    if (issue.reporter_id !== userId) {
+      throw new ApiError(
+        409,
+        "You are not authorized to update this issue",
+      );
+    }
+
+    // Can update only if status is open
+    if (issue.status !== "open") {
+      throw new ApiError(
+        403,
+        "You can only update issues with open status",
+      );
+    }
+
+    // Contributor cannot update status
+    if (payload.status !== undefined) {
+      throw new ApiError(
+        403,
+        "Only maintainers can update issue status",
+      );
+    }
   }
+
   const { title, description, status, type } = payload;
   if (
     title === undefined &&
@@ -179,8 +202,20 @@ const updateIssueIntoDB = async (
     `,
     values,
   );
-  
+
   return updatedResult.rows[0];
+};
+
+const deleteIssueFromDB = async (id: string) => {
+  const result = await pool.query(
+    `
+    DELETE FROM issues WHERE id = $1
+    RETURNING *
+    `,
+    [id],
+  );
+
+  return result.rows[0];
 };
 
 export const issueService = {
@@ -188,4 +223,5 @@ export const issueService = {
   getSingleIssueFromDB,
   createIssueIntoDB,
   updateIssueIntoDB,
+  deleteIssueFromDB,
 };

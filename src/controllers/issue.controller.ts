@@ -16,13 +16,10 @@ const getAllIssues = async (
       type,
       status,
     } as IIssueQueryOptions);
-    if (!result || result.length === 0) {
-      throw new ApiError(404, "No issues found");
-    }
     sendResponse(res, {
       statusCode: 200,
       success: true,
-      data: result,
+      data: result || [],
     });
   } catch (error) {
     next(error);
@@ -88,13 +85,13 @@ const updateIssue = async (req: Request, res: Response, next: NextFunction) => {
       throw new ApiError(401, "Unauthorized");
     }
     const result = await issueService.updateIssueIntoDB(
-      id,
+      id as string,
       userId,
       userRole,
       req.body,
     );
 
-    if(!result){
+    if (!result) {
       throw new ApiError(404, "Issue not found");
     }
 
@@ -109,9 +106,29 @@ const updateIssue = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const deleteIssue = async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+  try {
+
+    const result = await issueService.deleteIssueFromDB(id as string);
+    if (!result) {
+      throw new ApiError(404, "Issue not found");
+    }
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Issue deleted successfully",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const issueController = {
   getAllIssues,
   getSingleIssue,
   createIssue,
-  updateIssue
+  updateIssue,
+  deleteIssue,
 };
