@@ -3,6 +3,7 @@ import { issueService } from "../services/issue.service";
 import { ApiError } from "../utils/ApiError";
 import sendResponse from "../utils/sendResponse";
 import type { IIssueQueryOptions } from "../interfaces/issues.interface";
+
 const getAllIssues = async (
   req: Request,
   res: Response,
@@ -28,6 +29,27 @@ const getAllIssues = async (
   }
 };
 
+const getSingleIssue = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { id } = req.params;
+
+  try {
+    const resutl = await issueService.getSingleIssueFromDB(id as string);
+    if (!resutl || resutl.length === 0) {
+      throw new ApiError(404, "Issue not found");
+    }
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      data: resutl,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 const createIssue = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -57,6 +79,7 @@ const createIssue = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 export const issueController = {
-  createIssue,
   getAllIssues,
+  getSingleIssue,
+  createIssue,
 };

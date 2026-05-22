@@ -22,9 +22,9 @@ const getAllIsueFromDB = async (options) => {
     if (issues.length === 0) {
         return [];
     }
-    //all reporter ids
+    //?all reporter ids
     const reporterIds = [...new Set(issues.map((issue) => issue.reporter_id))];
-    //dynamic placeholder
+    //?dynamic placeholder
     const placeholders = reporterIds
         .map((_, index) => {
         return `$${index + 1}`;

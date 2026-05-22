@@ -74,6 +74,52 @@ const getAllIsueFromDB = async (options: IIssueQueryOptions) => {
   return formattedIssues;
 };
 
+const getSingleIssueFromDB = async (id: string) => {
+  const result = await pool.query(
+    `
+    SELECT * FROM issues WHERE id = $1`,
+    [id],
+  );
+
+  if (result.rows.length === 0) {
+    throw new Error("Issue not found");
+  }
+  const issue = result.rows;
+
+  const reporterId = result.rows[0].reporter_id;
+
+  const userResult = await pool.query(
+    `
+    SELECT id, name, role FROM users WHERE id = $1
+    `,
+    [reporterId],
+  );
+
+  const user = userResult.rows;
+  const userMap = user.reduce(
+    (acc, user) => {
+      acc[user.id] = user;
+      return acc;
+    },
+    {} as Record<number, { id: number; name: string; role: string }>,
+  );
+
+  const formattedIssue = issue.map((issue) => {
+    return {
+      id: issue.id,
+      title: issue.title,
+      description: issue.description,
+      type: issue.type,
+      status: issue.status,
+      reporter: userMap[issue.reporter_id] || null,
+      created_at: issue.created_at,
+      updated_at: issue.updated_at,
+    };
+  });
+
+  return formattedIssue;
+};
+
 const createIssueIntoDB = async (payload: IIssue) => {
   const { title, description, type, reporter_id } = payload;
 
@@ -89,6 +135,7 @@ const createIssueIntoDB = async (payload: IIssue) => {
 };
 
 export const issueService = {
-  createIssueIntoDB,
   getAllIsueFromDB,
+  getSingleIssueFromDB,
+  createIssueIntoDB,
 };
