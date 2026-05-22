@@ -1,8 +1,8 @@
 import type { NextFunction, Request, Response } from "express";
 import { issueService } from "../services/issue.service";
-import { ApiError } from "../utils/ApiError";
-import sendResponse from "../utils/sendResponse";
-import type { IIssueQueryOptions } from "../interfaces/issues.interface";
+import { ApiError } from "../../utils/ApiError";
+import sendResponse from "../../utils/sendResponse";
+import type { IIssueQueryOptions } from "./issues.interface";
 
 const getAllIssues = async (
   req: Request,

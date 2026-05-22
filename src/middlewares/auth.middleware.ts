@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt, { type JwtPayload } from "jsonwebtoken";
 import envConfig from "../config/env";
-import type { UserRoleType } from "../interfaces/user.interface";
+import type { UserRoleType } from "../modules/auth/user.interface";
 import { pool } from "../config/db";
 import { ApiError } from "../utils/ApiError";
 

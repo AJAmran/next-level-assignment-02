@@ -1,9 +1,7 @@
-import { pool } from "../config/db";
-import type {
-  IIssue,
-  IIssueQueryOptions,
-} from "../interfaces/issues.interface";
-import { ApiError } from "../utils/ApiError";
+import { pool } from "../../config/db";
+import type { IIssue, IIssueQueryOptions } from "./issues.interface";
+import { ApiError } from "../../utils/ApiError";
+
 
 const getAllIsueFromDB = async (options: IIssueQueryOptions) => {
   const { sort = "newest", type, status } = options;

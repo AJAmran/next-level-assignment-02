@@ -1,4 +1,4 @@
-import type { IUserResponse } from "./user.interface";
+import type { IUserResponse } from "../auth/user.interface";
 
 const IssueType = {
   BUG: "bug",

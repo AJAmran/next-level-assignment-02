@@ -1,12 +1,15 @@
 import type { NextFunction, Request, Response } from "express";
-import { authService } from "../services/auth.service";
-import sendResponse from "../utils/sendResponse";
-import type { IUserResponse } from "../interfaces/user.interface";
+import { authService } from "./auth.service";
+import sendResponse from "../../utils/sendResponse";
+import type { IUserResponse } from "./user.interface";
 
-const signUpUser = async (req: Request, res: Response, next: NextFunction) => {
+const signUpUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
   try {
     const result: IUserResponse = await authService.signUp(req.body);
-    console.log(result);
     if (result) {
       sendResponse(res, {
         statusCode: 201,
