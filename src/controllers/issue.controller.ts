@@ -37,14 +37,14 @@ const getSingleIssue = async (
   const { id } = req.params;
 
   try {
-    const resutl = await issueService.getSingleIssueFromDB(id as string);
-    if (!resutl || resutl.length === 0) {
+    const result = await issueService.getSingleIssueFromDB(id as string);
+    if (!result) {
       throw new ApiError(404, "Issue not found");
     }
     sendResponse(res, {
       statusCode: 200,
       success: true,
-      data: resutl,
+      data: result,
     });
   } catch (error) {
     next(error);
@@ -78,8 +78,40 @@ const createIssue = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const updateIssue = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+
+    if (!userId || !userRole) {
+      throw new ApiError(401, "Unauthorized");
+    }
+    const result = await issueService.updateIssueIntoDB(
+      id,
+      userId,
+      userRole,
+      req.body,
+    );
+
+    if(!result){
+      throw new ApiError(404, "Issue not found");
+    }
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Issue updated successfully",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const issueController = {
   getAllIssues,
   getSingleIssue,
   createIssue,
+  updateIssue
 };

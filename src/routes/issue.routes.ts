@@ -12,4 +12,6 @@ router.post(
   issueController.createIssue,
 );
 
+router.patch("/:id", authMiddleware("contributor", "maintainer"), issueController.updateIssue);
+
 export const issueRoute = router;

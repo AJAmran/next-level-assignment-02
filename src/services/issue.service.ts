@@ -3,6 +3,7 @@ import type {
   IIssue,
   IIssueQueryOptions,
 } from "../interfaces/issues.interface";
+import { ApiError } from "../utils/ApiError";
 
 const getAllIsueFromDB = async (options: IIssueQueryOptions) => {
   const { sort = "newest", type, status } = options;
@@ -75,18 +76,18 @@ const getAllIsueFromDB = async (options: IIssueQueryOptions) => {
 };
 
 const getSingleIssueFromDB = async (id: string) => {
-  const result = await pool.query(
+  const issueResult = await pool.query(
     `
     SELECT * FROM issues WHERE id = $1`,
     [id],
   );
 
-  if (result.rows.length === 0) {
-    throw new Error("Issue not found");
+  if (issueResult.rows.length === 0) {
+    return [];
   }
-  const issue = result.rows;
+  const issue = issueResult.rows[0];
 
-  const reporterId = result.rows[0].reporter_id;
+  const reporterId = issueResult.rows[0].reporter_id;
 
   const userResult = await pool.query(
     `
@@ -95,27 +96,18 @@ const getSingleIssueFromDB = async (id: string) => {
     [reporterId],
   );
 
-  const user = userResult.rows;
-  const userMap = user.reduce(
-    (acc, user) => {
-      acc[user.id] = user;
-      return acc;
-    },
-    {} as Record<number, { id: number; name: string; role: string }>,
-  );
+  const user = userResult.rows[0];
 
-  const formattedIssue = issue.map((issue) => {
-    return {
-      id: issue.id,
-      title: issue.title,
-      description: issue.description,
-      type: issue.type,
-      status: issue.status,
-      reporter: userMap[issue.reporter_id] || null,
-      created_at: issue.created_at,
-      updated_at: issue.updated_at,
-    };
-  });
+  const formattedIssue = {
+    id: issue.id,
+    title: issue.title,
+    description: issue.description,
+    type: issue.type,
+    status: issue.status,
+    reporter: user,
+    created_at: issue.created_at,
+    updated_at: issue.updated_at,
+  };
 
   return formattedIssue;
 };
@@ -134,8 +126,66 @@ const createIssueIntoDB = async (payload: IIssue) => {
   return result;
 };
 
+const updateIssueIntoDB = async (
+  id: string,
+  userId: number,
+  userRole: string,
+  payload: Partial<IIssue>,
+) => {
+  const issueCheck = await pool.query(
+    `
+      SELECT reporter_id FROM issues WHERE id = $1
+      `,
+    [id],
+  );
+
+  if (issueCheck.rows.length === 0) {
+    throw new ApiError(404, "Issue not found");
+  }
+
+  const issue = issueCheck.rows[0];
+
+  if (userRole !== "maintainer" && issue.reporter_id !== userId) {
+    throw new ApiError(403, "You are not authorized to update this issue");
+  }
+  const { title, description, status, type } = payload;
+  if (
+    title === undefined &&
+    description === undefined &&
+    status === undefined &&
+    type === undefined
+  ) {
+    throw new ApiError(400, "Please provide at least one field to update");
+  }
+
+  const values: (string | number | null)[] = [
+    title ?? null,
+    description ?? null,
+    status ?? null,
+    type ?? null,
+    id,
+  ];
+
+  const updatedResult = await pool.query(
+    `
+    UPDATE issues
+    SET title = COALESCE($1, title),
+    description = COALESCE($2, description),
+    status = COALESCE($3, status),
+    type = COALESCE($4, type),
+    updated_at = NOW() 
+    WHERE id = $5
+    RETURNING *
+    `,
+    values,
+  );
+  
+  return updatedResult.rows[0];
+};
+
 export const issueService = {
   getAllIsueFromDB,
   getSingleIssueFromDB,
   createIssueIntoDB,
+  updateIssueIntoDB,
 };
