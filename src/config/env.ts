@@ -13,6 +13,7 @@ const envConfig = {
     SignOptions["expiresIn"]
   >,
   BCRYPT_SALT_ROUNDS: Number(env.BCRYPT_SALT_ROUNDS || 12),
+  ALLOWED_ORIGINS: env.ALLOWED_ORIGINS?.split(",") || [],
 };
 
 export default envConfig;

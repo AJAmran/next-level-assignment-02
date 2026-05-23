@@ -19,7 +19,8 @@ var envConfig = {
   NODE_ENV: env.NODE_ENV || "development",
   JWT_SECRET_KEY: env.JWT_SECRET_KEY,
   JWT_EXPIRES_IN: env.JWT_EXPIRES_IN || "1d",
-  BCRYPT_SALT_ROUNDS: Number(env.BCRYPT_SALT_ROUNDS || 12)
+  BCRYPT_SALT_ROUNDS: Number(env.BCRYPT_SALT_ROUNDS || 12),
+  ALLOWED_ORIGINS: env.ALLOWED_ORIGINS?.split(",") || []
 };
 var env_default = envConfig;
 
@@ -573,8 +574,24 @@ router2.delete(
 var issueRoute = router2;
 
 // src/app.ts
+import cors from "cors";
 var app = express3();
 app.use(express3.json());
+var allowedOrigins = env_default.ALLOWED_ORIGINS.length > 0 ? env_default.ALLOWED_ORIGINS : ["*"];
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes("*") || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+  })
+);
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
