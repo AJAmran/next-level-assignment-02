@@ -50,6 +50,6 @@ export const globalErrorHandler: ErrorRequestHandler = (
     statusCode,
     success: false,
     message,
-    errors: err,
+    errors: message,
   });
 };

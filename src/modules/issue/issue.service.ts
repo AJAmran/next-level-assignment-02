@@ -147,7 +147,7 @@ const updateIssueIntoDB = async (
     // Must be issue owner
     if (issue.reporter_id !== userId) {
       throw new ApiError(
-        409,
+        403,
         "You are not authorized to update this issue",
       );
     }
@@ -155,7 +155,7 @@ const updateIssueIntoDB = async (
     // Can update only if status is open
     if (issue.status !== "open") {
       throw new ApiError(
-        403,
+        409,
         "You can only update issues with open status",
       );
     }

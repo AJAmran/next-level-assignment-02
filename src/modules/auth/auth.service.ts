@@ -3,6 +3,7 @@ import envConfig from "../../config/env";
 import { pool } from "../../config/db";
 import type { IUser } from "./user.interface";
 import jwt from "jsonwebtoken";
+import { ApiError } from "../../utils/ApiError";
 
 const signUp = async (payload: IUser) => {
   const { name, email, password, role = "contributor" } = payload;
@@ -35,7 +36,7 @@ const login = async (payload: { email: string; password: string }) => {
   );
 
   if (Result.rows.length === 0) {
-    throw new Error("User not found");
+    throw new ApiError(401, "Invalid email or password");
   }
 
   const user = Result.rows[0];
@@ -43,7 +44,7 @@ const login = async (payload: { email: string; password: string }) => {
   const isPasswordValid = await bcrypt.compare(password, user.password);
 
   if (!isPasswordValid) {
-    throw new Error("Invalid password");
+    throw new ApiError(401, "Invalid password");
   }
 
   // generate token

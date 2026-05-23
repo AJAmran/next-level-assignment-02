@@ -1,8 +1,8 @@
 import type { NextFunction, Request, Response } from "express";
-import { issueService } from "../services/issue.service";
 import { ApiError } from "../../utils/ApiError";
 import sendResponse from "../../utils/sendResponse";
 import type { IIssueQueryOptions } from "./issues.interface";
+import { issueService } from "./issue.service";
 
 const getAllIssues = async (
   req: Request,
@@ -118,7 +118,6 @@ const deleteIssue = async (req: Request, res: Response, next: NextFunction) => {
       statusCode: 200,
       success: true,
       message: "Issue deleted successfully",
-      data: result,
     });
   } catch (error) {
     next(error);
